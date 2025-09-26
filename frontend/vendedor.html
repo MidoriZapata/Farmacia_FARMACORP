@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel del Vendedor</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</head>
+<body class="bg-white text-gray-800 min-h-screen">
+
+  <!-- Verificar sesión -->
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const usuario = localStorage.getItem('usuario');
+    if (!usuario) {
+      window.location.href = 'login.html';
+    } else {
+      const usuarioObj = JSON.parse(usuario);
+      document.getElementById('nombreUsuario').textContent = usuarioObj.username;
+      mostrarContenido('ventas');
+    }
+  });
+</script>
+
+
+  <div class="flex w-full h-screen">
+    <!-- Menú lateral -->
+    <aside class="w-64 bg-blue-700 text-white p-6 shadow-lg">
+      <div class="mb-6 text-center">
+        <img src="C:/Users/Pamela Jr/Farmacia_Farmacorp/imagenes/logo.png" alt="Logo" class="w-24 h-24 rounded-full mx-auto mb-2 border-4 border-yellow-400">
+        <p id="nombreUsuario" class="font-bold text-lg">Vendedor</p>
+      </div>
+      <nav class="space-y-3">
+        <button onclick="mostrarContenido('ventas')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold">Realizar Venta</button>
+        <button onclick="mostrarContenido('historial')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold">Historial</button>
+        <button onclick="mostrarContenido('alertas')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold">Alertas</button>
+        <button onclick="cerrarSesion()" class="w-full bg-red-500 hover:bg-red-400 text-white py-2 px-4 rounded font-semibold">Cerrar sesión</button>
+      </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 p-6 overflow-y-auto bg-white">
+      <!-- SECCIÓN DE VENTAS -->
+      <section id="ventas" class="hidden space-y-6">
+        <h2 class="text-2xl font-bold text-blue-700">Realizar Venta</h2>
+
+        <form id="formVenta" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="text" id="codigo" placeholder="Código del producto" required class="px-4 py-2 border rounded" />
+            <input type="text" id="producto" placeholder="Nombre del producto" required class="px-4 py-2 border rounded" />
+            <input type="number" id="cantidad" placeholder="Cantidad" min="1" required class="px-4 py-2 border rounded" />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="number" id="precio" placeholder="Precio unitario" min="0" step="0.01" required class="px-4 py-2 border rounded" />
+            <input type="number" id="total" placeholder="Total" readonly class="px-4 py-2 border rounded bg-gray-100" />
+            <input type="text" id="cliente" placeholder="Nombre del cliente" required class="px-4 py-2 border rounded" />
+          </div>
+
+          <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Registrar Venta</button>
+          <p id="mensajeVenta" class="text-green-600 font-semibold"></p>
+        </form>
+
+        <!-- TABLA DE VENTA -->
+        <div id="ventaTablaContainer" class="overflow-x-auto mt-6">
+          <table class="min-w-full bg-white shadow rounded-lg" id="tablaVenta">
+            <thead class="bg-yellow-400 text-blue-900 font-bold">
+              <tr>
+                <th class="py-2 px-4 border">#</th>
+                <th class="py-2 px-4 border">Código</th>
+                <th class="py-2 px-4 border">Producto</th>
+                <th class="py-2 px-4 border">Cliente</th>
+                <th class="py-2 px-4 border">NIT/CI</th>
+                <th class="py-2 px-4 border">Cantidad</th>
+                <th class="py-2 px-4 border">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="ventaBody">
+              <!-- Filas dinámicas -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TOTAL Y BOTÓN FACTURA -->
+        <div class="text-right mt-4">
+          <p class="text-xl font-bold">Total Venta: <span id="totalVenta">0.00</span> Bs</p>
+          <button onclick="descargarFactura()" class="mt-2 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded">Descargar Factura</button>
+        </div>
+      </section>
+
+      <!-- SECCIÓN HISTORIAL -->
+      <section id="historial" class="hidden space-y-6">
+        <h2 class="text-2xl font-bold text-blue-700">Historial de Ventas</h2>
+        <table class="w-full table-auto border text-center">
+          <thead class="bg-blue-100">
+            <tr>
+              <th class="border px-4 py-2">Cliente</th>
+              <th class="border px-4 py-2">Monto</th>
+              <th class="border px-4 py-2">Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="historialList" class="bg-white"></tbody>
+        </table>
+      </section>
+
+      <!-- SECCIÓN ALERTAS -->
+      <section id="alertas" class="hidden space-y-6">
+        <h2 class="text-2xl font-bold text-blue-700">Alertas</h2>
+        <table class="w-full table-auto border text-center">
+          <thead class="bg-blue-100">
+            <tr>
+              <th class="border px-4 py-2">Descripción</th>
+              <th class="border px-4 py-2">Fecha</th>
+              <th class="border px-4 py-2">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="alertasList" class="bg-white"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  
+  <!-- SCRIPTS -->
+  <script>
+    function mostrarContenido(id) {
+      document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuario');
+      window.location.href = 'login.html';
+    }
+  </script>
+
+  <script src="js/ventas.js"></script>
+</body>
+</html>

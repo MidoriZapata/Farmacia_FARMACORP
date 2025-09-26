@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel del Administrador</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-white text-gray-800 min-h-screen">
+
+  <!-- Redirección si no hay sesión -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const usuario = localStorage.getItem('usuario');
+      if (!usuario) {
+        window.location.href = 'login.html';
+      } else {
+        document.getElementById('nombreUsuario').textContent = usuario;
+        mostrarContenido('usuarios'); // Mostrar sección por defecto
+        cargarUsuarios(); // Mostrar usuarios ya guardados
+      }
+    });
+  </script>
+
+  <div class="flex w-full h-screen">
+    <!-- Barra lateral -->
+    <aside class="w-64 bg-blue-700 text-white p-6 shadow-lg">
+      <div class="mb-6 text-center">
+        <img src="C:\Users\Pamela Jr\Farmacia_Farmacorp\imagenes\logo.png" alt="Logo" class="w-24 h-24 rounded-full mx-auto mb-2 border-4 border-yellow-400">
+        <p id="nombreUsuario" class="font-bold text-lg">Admin</p>
+      </div>
+      <nav class="space-y-3">
+        <button onclick="mostrarContenido('usuarios')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold transition">Usuarios</button>
+        <button onclick="mostrarContenido('productos')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold transition">Productos</button>
+        <button onclick="mostrarContenido('ventas')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold transition">Ventas</button>
+        <button onclick="mostrarContenido('alertas')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold transition">Alertas</button>
+        <button onclick="cerrarSesion()" class="w-full bg-red-500 hover:bg-red-400 text-white py-2 px-4 rounded font-semibold transition">Cerrar sesión</button>
+      </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 p-6 overflow-y-auto bg-white">
+      
+      <!-- Sección USUARIOS -->
+      <section id="usuarios" class="hidden space-y-6">
+        <h2 class="text-2xl font-bold text-blue-700">Registrar Usuario</h2>
+        <form id="registroForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input type="text" id="username" placeholder="Usuario" required class="px-4 py-2 border rounded">
+          <input type="password" id="password" placeholder="Contraseña" required class="px-4 py-2 border rounded">
+          <select id="rol" required class="px-4 py-2 border rounded">
+            <option value="">Seleccionar rol</option>
+            <option value="admin">Administrador</option>
+            <option value="vendedor">Vendedor</option>
+          </select>
+          <button type="submit" class="md:col-span-3 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Registrar</button>
+        </form>
+
+        <div>
+          <h3 class="text-xl font-semibold text-blue-600 mb-2">Usuarios Registrados</h3>
+          <table class="w-full table-auto border text-center">
+            <thead class="bg-blue-100">
+              <tr>
+                <th class="border px-4 py-2">Usuario</th>
+                <th class="border px-4 py-2">Rol</th>
+              </tr>
+            </thead>
+            <tbody id="usuariosList" class="bg-white"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Sección PRODUCTOS -->
+<section id="productos" class="hidden space-y-6">
+  <h2 class="text-2xl font-bold text-blue-700">Productos</h2>
+  <table class="w-full table-auto border text-center">
+    <thead class="bg-blue-100">
+      <tr>
+        <th class="border px-4 py-2">ID</th>
+        <th class="border px-4 py-2">Nombre</th>
+        <th class="border px-4 py-2">Precio</th>
+        <th class="border px-4 py-2">Stock</th>
+      </tr>
+    </thead>
+    <tbody id="productosList" class="bg-white">
+      <!-- Aquí se llenarán los productos -->
+    </tbody>
+  </table>
+</section>
+<!-- Sección VENTAS -->
+<section id="ventas" class="hidden space-y-6">
+  <h2 class="text-2xl font-bold text-blue-700">Ventas</h2>
+  <table class="w-full table-auto border text-center">
+    <thead class="bg-blue-100">
+      <tr>
+        <th class="border px-4 py-2">ID Venta</th>
+        <th class="border px-4 py-2">Fecha</th>
+        <th class="border px-4 py-2">Cliente</th>
+        <th class="border px-4 py-2">Total</th>
+      </tr>
+    </thead>
+    <tbody id="ventasList" class="bg-white">
+      <!-- Aquí se llenarán las ventas -->
+    </tbody>
+  </table>
+</section>
+<!-- Sección ALERTAS -->
+<section id="alertas" class="hidden space-y-6">
+  <h2 class="text-2xl font-bold text-blue-700">Alertas</h2>
+  <table class="w-full table-auto border text-center">
+    <thead class="bg-blue-100">
+      <tr>
+        <th class="border px-4 py-2">ID Alerta</th>
+        <th class="border px-4 py-2">Descripción</th>
+        <th class="border px-4 py-2">Fecha</th>
+        <th class="border px-4 py-2">Estado</th>
+      </tr>
+    </thead>
+    <tbody id="alertasList" class="bg-white">
+      <!-- Aquí se llenarán las alertas -->
+    </tbody>
+  </table>
+</section>
+    </main>
+  </div>
+
+  <!-- Script funcional -->
+  <script>
+  const mostrarContenido = (seccion) => {
+    document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+    document.getElementById(seccion).classList.remove('hidden');
+  };
+
+  const cerrarSesion = () => {
+    localStorage.removeItem('usuario');
+    window.location.href = 'login.html';
+  };
+
+  // Carga usuarios desde backend y muestra en tabla
+  const cargarUsuarios = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/usuarios/");
+      const data = await res.json();
+      const tabla = document.getElementById('usuariosList');
+      tabla.innerHTML = '';
+      data.forEach(u => {
+        const fila = `<tr>
+          <td class="border px-4 py-2">${u.username}</td>
+          <td class="border px-4 py-2">${u.rol}</td>
+        </tr>`;
+        tabla.innerHTML += fila;
+      });
+    } catch (err) {
+      console.error("Error al cargar usuarios:", err);
+    }
+  };
+
+  // Evento para registrar usuario enviando datos al backend
+  document.getElementById('registroForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const rol = document.getElementById('rol').value;
+
+    if (!username || !password || !rol) {
+      alert('Todos los campos son obligatorios.');
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/usuarios/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, es_admin: rol === "admin" })
+      });
+
+      if (res.ok) {
+        alert("Usuario registrado correctamente");
+        document.getElementById('registroForm').reset();
+        cargarUsuarios();
+      } else {
+        const errorData = await res.json();
+        alert("Error al registrar usuario: " + errorData.detail);
+      }
+    } catch (err) {
+      console.error("Error al registrar:", err);
+      alert("Error al registrar usuario");
+    }
+  });
+
+  // Carga usuarios al cargar la página
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarUsuarios();
+  });
+</script>
+
+</body>
+</html>

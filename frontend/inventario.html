@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Inventario</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-white text-gray-800 min-h-screen">
+
+  <!-- Verificar sesión -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const usuario = localStorage.getItem('usuario');
+      if (!usuario) {
+        window.location.href = 'login.html';
+      } else {
+        document.getElementById('nombreUsuario').textContent = usuario;
+        mostrarContenido('registro');
+      }
+    });
+  </script>
+
+  <div class="flex w-full h-screen">
+    <!-- Barra lateral -->
+    <aside class="w-64 bg-blue-700 text-white p-6 shadow-lg">
+      <div class="mb-6 text-center">
+        <img src="imagenes/logo.png" alt="Logo" class="w-24 h-24 rounded-full mx-auto mb-2 border-4 border-yellow-400">
+        <p id="nombreUsuario" class="font-bold text-lg">Inventario</p>
+      </div>
+      <nav class="space-y-3">
+        <button onclick="mostrarContenido('registro')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold transition">Registrar Producto</button>
+        <button onclick="mostrarContenido('productos')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold transition">Ver Productos</button>
+        <button onclick="mostrarContenido('alertas')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 py-2 px-4 rounded font-semibold transition">Alertas</button>
+        <button onclick="cerrarSesion()" class="w-full bg-red-500 hover:bg-red-400 text-white py-2 px-4 rounded font-semibold transition">Cerrar sesión</button>
+      </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 p-6 overflow-y-auto bg-white">
+      <!-- Registrar producto -->
+      <section id="registro" class="hidden">
+        <h2 class="text-2xl font-bold text-blue-700 mb-4">Registrar Producto</h2>
+        <p class="text-gray-700">Aquí irá el formulario para registrar un nuevo producto.</p>
+      </section>
+
+      <!-- Ver productos -->
+      <section id="productos" class="hidden">
+        <h2 class="text-2xl font-bold text-blue-700 mb-4">Listado de Productos</h2>
+        <p class="text-gray-700">Aquí se mostrarán los productos registrados.</p>
+      </section>
+
+      <!-- Alertas -->
+      <section id="alertas" class="hidden">
+        <h2 class="text-2xl font-bold text-blue-700 mb-4">Alertas de Inventario</h2>
+        <p class="text-gray-700">Aquí se mostrarán alertas por productos con poco stock o por vencer.</p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Funciones -->
+  <script>
+    function mostrarContenido(id) {
+      document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuario');
+      window.location.href = 'login.html';
+    }
+  </script>
+
+  <script src="js/inventario.js"></script>
+</body>
+</html>
